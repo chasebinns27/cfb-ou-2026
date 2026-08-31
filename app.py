@@ -37,7 +37,10 @@ def render_leaderboard(df: pd.DataFrame):
     st.caption(
         "Locked = the pick has already mathematically clinched Over or Under. "
         "Projected Correct = Locked Correct plus each drafter's still-pending picks, "
-        "using the projection described below."
+        "using the projection described below. Tiebreaker = each drafter's 9 picks' "
+        "projected margins (projection vs. line, signed toward their pick) summed "
+        "together — whoever's picks are collectively projected further in their own "
+        "favor ranks higher when Projected Correct ties."
     )
 
     summary = (
@@ -45,12 +48,13 @@ def render_leaderboard(df: pd.DataFrame):
         .apply(lambda g: pd.Series({
             "Locked Correct": (g["outcome"] == "Correct").sum(),
             "Locked Incorrect": (g["outcome"] == "Incorrect").sum(),
-            "Pending": (g["outcome"] == "Pending").sum(),
             "Projected Correct": (g["projected_outcome"] == "Correct").sum(),
+            "Tiebreaker": g["projected_margin"].sum(),
         }), include_groups=False)
         .reset_index()
         .rename(columns={"drafter": "Drafter"})
-        .sort_values(["Projected Correct", "Locked Correct"], ascending=False)
+        .assign(**{"Tiebreaker": lambda d: d["Tiebreaker"].round(2)})
+        .sort_values(["Projected Correct", "Tiebreaker"], ascending=False)
         .reset_index(drop=True)
     )
     summary.index = summary.index + 1
