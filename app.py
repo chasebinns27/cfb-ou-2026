@@ -49,6 +49,7 @@ def render_leaderboard(df: pd.DataFrame):
             "Locked Correct": (g["outcome"] == "Correct").sum(),
             "Locked Incorrect": (g["outcome"] == "Incorrect").sum(),
             "Projected Correct": (g["projected_outcome"] == "Correct").sum(),
+            "Projected Incorrect": (g["projected_outcome"] == "Incorrect").sum(),
             "Tiebreaker": g["projected_margin"].sum(),
         }), include_groups=False)
         .reset_index()
